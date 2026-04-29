@@ -5,6 +5,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <format>
 
 enum class Priority {
     Low,
@@ -18,6 +19,19 @@ enum class Status {
     Terminee
 };
 
+enum class Field {
+    title,
+    priority,
+    status,
+    category
+};
+
+enum class Category {
+    Travail,
+    Personnel,
+    Urgent,
+    Autre
+};
 
 class Task {
     private:
@@ -27,10 +41,11 @@ class Task {
         std::string time;
         Priority priority;
         Status status;
+        Category category;
 
     public:
         // constructor
-        Task(std::string t, Priority p) : id(nextId++), title(t), priority(p) {
+        Task(std::string t, Priority p, Category c) : id(nextId++), title(t), priority(p), category(c) {
             auto now = std::chrono::system_clock::now();
             time = std::format("{:%Y-%m-%d %H:%M:%S}", now);
             status = Status::EnCours;
@@ -49,14 +64,22 @@ class Task {
             status = s;
         }
 
+        void SetCategory(Category c) {
+            category = c;
+        }
+
         // getters
         int getId() {
             return id;
         }
 
         // methodes
-        void printTask(){
-            std::cout << "id: " << id << " | Task: " << title << " | Created at: " << time << " | Status: " << StatusToString(status) << std::endl;
+        void printTask() {
+            std::cout << "id: " << id
+                << " | [" << CategoryToString(category) << "]" 
+                << " | Task: " << title
+                << " | Status: " << StatusToString(status)
+                << " | Priority: " << PriorityToString(priority) << std::endl;
         }
 
         std::string StatusToString(Status s) {
@@ -67,12 +90,39 @@ class Task {
                 default:               return "A faire";
             }
         }
+
+        std::string PriorityToString(Priority p) {
+            switch (p) {
+            case Priority::Low:   return "Low";
+            case Priority::Medium:   return "Medium";
+            case Priority::High:   return "High";
+            default:               return "Medium";
+            }
+        }
+
+        std::string CategoryToString(Category c) {
+            switch (c) {
+            case Category::Travail:   return "Travail";
+            case Category::Personnel: return "Personnel";
+            case Category::Urgent:    return "Urgent";
+            default:                  return "Autre";
+            }
+        }
         
 };
 
 int Task::nextId = 1;
 
-void show_tasks(std::vector<Task> tasks) {
+int check_id(int id, std::vector<Task>& tasks) {
+    for (int i = 0; i < tasks.size(); i++) {
+        if (tasks[i].getId() == id) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void show_tasks(std::vector<Task>& tasks) {
     if (tasks.empty()) {
         std::cout << "|----------------------|\n";
         std::cout << "|   No tasks to show   |\n";
@@ -89,7 +139,128 @@ void show_tasks(std::vector<Task> tasks) {
         std::cout << "****************************\n";                                              
     }
 }
-                                                                     
+               
+void delete_task(int id, std::vector<Task>& tasks) {
+    if (id > tasks.size() || id < 0) {
+        std::cout << "id pas disponible\n";
+    }
+    else {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks[i].getId() == id) {
+                tasks.erase(tasks.begin() + i);
+                std::cout << "task deleted succesfully\n";
+                return;
+            }
+        }
+    }
+}
+
+
+//void modify_task(Field field, int id, std::vector<Task> tasks) {
+void modify_task(Field field, int id, std::vector<Task>& tasks) {
+    int index;
+    if (check_id(id, tasks) == 1) {
+        std::cout << "id pas disponible\n";
+    }
+    else {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks[i].getId() == id) {
+                index = i;
+            }
+        }
+    }
+
+    switch (field) {
+
+        case Field::status: {
+            int choice;
+            std::cout << "choisis la nouvelle status:\n";
+            std::cout << "1. Afaire\n";
+            std::cout << "2. EnCours\n";
+            std::cout << "3. Terminee\n";
+            std::cout << "votre choix: ";
+            std::cin >> choice;
+
+            switch (choice) {
+                case 1: {
+                    tasks[index].SetStatus(Status::Afaire);
+                    break;
+                }
+                case 2: {
+                    tasks[index].SetStatus(Status::EnCours);
+                    break;
+                }
+                case 3: {
+                    tasks[index].SetStatus(Status::Terminee);
+                    break;
+                }
+            }
+            std::cout << "Status changed Succesfully";
+            break;
+
+        }
+        case Field::title: {
+            std::string new_title;
+            std::cout << "enter the new title: ";
+            std::cin >> new_title;
+            tasks[index].SetTitle(new_title);
+            break;
+        }
+        case Field::priority: {
+            int choice;
+            std::cout << "choisis la nouvelle priority:\n";
+            std::cout << "1. Low\n";
+            std::cout << "2. Medium\n";
+            std::cout << "3. High\n";
+            std::cout << "votre choix: ";
+            std::cin >> choice;
+            switch (choice) {
+                case 1: {
+                    tasks[index].SetPriority(Priority::Low);
+                    break;
+                }
+                case 2: {
+                    tasks[index].SetPriority(Priority::Medium);
+                    break;
+                }
+                case 3: {
+                    tasks[index].SetPriority(Priority::High);
+                    break;
+                }
+            }
+            std::cout << "Priority changed Succesfully";
+            break;
+        }
+        case Field::category: {
+            int choice;
+            std::cout << "choisis la nouvelle category:\n";
+            std::cout << "1. Travail\n";
+            std::cout << "2. Personnel\n";
+            std::cout << "3. Urgent\n";
+            std::cout << "4. Autre\n";
+            std::cout << "votre choix: ";
+            std::cin >> choice;
+            switch (choice) {
+                case 1: {
+                    tasks[index].SetCategory(Category::Travail);
+                    break;
+                }
+                case 2: {
+                    tasks[index].SetCategory(Category::Personnel);
+                    break;
+                }
+                case 3: {
+                    tasks[index].SetCategory(Category::Urgent);
+                    break;
+                }
+                default: tasks[index].SetCategory(Category::Autre);
+            }
+            break;
+        }
+    }
+        
+}
+
 int main()
 {
     std::vector<Task> tasks;
@@ -100,7 +271,7 @@ int main()
         std::cout << "|1. Voir les taches               |\n";
         std::cout << "|2. Ajouter une tache             |\n";
         std::cout << "|3. Supprimer une tache           |\n";
-        std::cout << "|4. Changer status du tache       |\n";
+        std::cout << "|4. Modifier une tache            |\n";
         std::cout << "|5. Quitter                       |\n";
         std::cout << "|---------------------------------|\n";
 
@@ -117,6 +288,9 @@ int main()
                 std::string title;
                 int p;
                 Priority priority;
+                Category category;
+                int c;
+
                 std::cin.ignore();
                 std::cout << "enter title: ";
                 std::getline(std::cin, title);
@@ -134,7 +308,24 @@ int main()
                     case 3: priority = Priority::High; break;
                     default: priority = Priority::Low; break;
                 }
-                Task new_task = Task(title, priority);
+
+                std::cout << "enter category: \n";
+                std::cout << "1. Travail\n";
+                std::cout << "2. Personnel\n";
+                std::cout << "3. Urgent\n";
+                std::cout << "4. Autre\n";
+                std::cout << "votre choix: ";
+                std::cin >> c;
+
+                switch (c) {
+                    case 1: category = Category::Travail; break;
+                    case 2: category = Category::Personnel; break;
+                    case 3: category = Category::Urgent; break;
+                    default: category = Category::Autre; break;
+                }
+                
+
+                Task new_task = Task(title, priority, category);
 
                 tasks.push_back(new_task);
 
@@ -147,16 +338,7 @@ int main()
                 std::cout << "entrez l'id de cette task: ";
                 std::cin >> id;
 
-                if (id > tasks.size() || id < 0) {
-                    std::cout << "id pas disponible\n";
-                }else {
-                    for (int i = 0; i < tasks.size(); i++) {
-                        if (tasks[i].getId() == id) {
-                            tasks.erase(tasks.begin() + i);
-                            std::cout << "task deleted succesfully\n";
-                        }
-                    }
-                }
+                delete_task(id, tasks);
                 
                 break;
             }
@@ -165,33 +347,33 @@ int main()
                 int id;
                 std::cout << "entrez l'id de cette task: ";
                 std::cin >> id;
-                if (id > tasks.size() || id < 0) {
+                if (check_id(id, tasks) == 1) {
                     std::cout << "id pas disponible\n";
                 }else {
                     int choice;
-                    std::cout << "choisis la nouvelle status:\n";
-                    std::cout << "1. Afaire\n";
-                    std::cout << "2. EnCours\n";
-                    std::cout << "3. Terminee\n";
+                    std::cout << "Which field u wanna modifie:\n";
+                    std::cout << "1. Title\n";
+                    std::cout << "2. Status\n";
+                    std::cout << "3. Priority\n";
+                    std::cout << "4. Category\n";
                     std::cout << "votre choix: ";
                     std::cin >> choice;
-                    for (int i = 0; i < tasks.size(); i++) {
-                        if (tasks[i].getId() == id) {
-                            switch (choice) {
-                                case 1: {
-                                    tasks[i].SetStatus(Status::Afaire);
-                                    break;
-                                }
-                                case 2: {
-                                    tasks[i].SetStatus(Status::EnCours);
-                                    break;
-                                }
-                                case 3: {
-                                    tasks[i].SetStatus(Status::Terminee);
-                                    break;
-                                }
-                            }
-                            std::cout << "Status changed Succesfully";
+                    switch (choice) {
+                        case 1: {
+                            modify_task(Field::title, id, tasks);
+                            break;
+                        }
+                        case 2: {
+                            modify_task(Field::status, id, tasks);
+                            break;
+                        }
+                        case 3: {
+                            modify_task(Field::priority, id, tasks);
+                            break;
+                        }
+                        case 4: {
+                            modify_task(Field::category, id, tasks);
+                            break;
                         }
                     }
                 }
