@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <format>
+#include <algorithm>
 
 enum class Priority {
     Low,
@@ -75,6 +76,18 @@ class Task {
 
         Category getCategory() {
             return category;
+        }
+
+        Priority getPriority() {
+            return priority;
+        }
+
+        Status getStatus() {
+            return status;
+        }
+
+        std::string getTime() const {
+            return time;
         }
 
         // methodes
@@ -159,28 +172,80 @@ void delete_task(int id, std::vector<Task>& tasks) {
     }
 }
 
-void tasks_by_category(std::vector<Task>& tasks) {
-    int c;
-    std::cout << "enter category: \n";
-    std::cout << "1. Travail\n";
-    std::cout << "2. Personnel\n";
-    std::cout << "3. Urgent\n";
-    std::cout << "4. Autre\n";
-    std::cout << "votre choix: ";
-    std::cin >> c;
-
-    Category cat;
-    if (c == 1) cat = Category::Travail;
-    else if (c == 2) cat = Category::Personnel;
-    else if (c == 3) cat = Category::Urgent;
-    else cat = Category::Autre;
-
+void filter_by(Field field, std::vector<Task>& tasks) {
     bool found = false;
-    for (int i = 0; i < tasks.size(); i++) {
-        if (tasks[i].getCategory() == cat) {
-            tasks[i].printTask();
-            found = true;
+    switch (field) {
+        case Field::category: {
+            int c;
+            std::cout << "enter category: \n";
+            std::cout << "1. Travail\n";
+            std::cout << "2. Personnel\n";
+            std::cout << "3. Urgent\n";
+            std::cout << "4. Autre\n";
+            std::cout << "votre choix: ";
+            std::cin >> c;
+
+            Category cat;
+            if (c == 1) cat = Category::Travail;
+            else if (c == 2) cat = Category::Personnel;
+            else if (c == 3) cat = Category::Urgent;
+            else cat = Category::Autre;
+
+            for (int i = 0; i < tasks.size(); i++) {
+                if (tasks[i].getCategory() == cat) {
+                    tasks[i].printTask();
+                    found = true;
+                }
+            }
+            break;
         }
+        case Field::priority: {
+            int p;
+            std::cout << "enter priority: \n";
+            std::cout << "1. Low\n";
+            std::cout << "2. Medium\n";
+            std::cout << "3. High\n";
+            std::cout << "votre choix: ";
+            std::cin >> p;
+
+            Priority priority;
+            if (p == 1) priority = Priority::Low;
+            else if (p == 2) priority = Priority::Medium;
+            else if (p == 3) priority = Priority::High;
+            else priority = Priority::Low;
+
+            for (int i = 0; i < tasks.size(); i++) {
+                if (tasks[i].getPriority() == priority) {
+                    tasks[i].printTask();
+                    found = true;
+                }
+            }
+            break;
+        }
+        case Field::status: {
+            int s;
+            std::cout << "choisis la nouvelle status:\n";
+            std::cout << "1. Afaire\n";
+            std::cout << "2. EnCours\n";
+            std::cout << "3. Terminee\n";
+            std::cout << "votre choix: ";
+            std::cin >> s;
+
+            Status status;
+            if (s == 1) status = Status::Afaire;
+            else if (s == 2) status = Status::EnCours;
+            else if (s == 3) status = Status::Terminee;
+            else status = Status::Afaire;
+
+            for (int i = 0; i < tasks.size(); i++) {
+                if (tasks[i].getStatus() == status) {
+                    tasks[i].printTask();
+                    found = true;
+                }
+            }
+            break;
+        }
+        
     }
     if (!found) {
         std::cout << "|----------------------|\n";
@@ -294,6 +359,32 @@ void modify_task(Field field, int id, std::vector<Task>& tasks) {
         
 }
 
+
+void tasks_sorted(std::vector<Task> tasks) { 
+    if (tasks.empty()) {
+        std::cout << "|----------------------|\n";
+        std::cout << "|   No tasks to show   |\n";
+        std::cout << "|----------------------|\n";
+        return;
+    }
+
+    // Sort the local copy 'tasks'
+    std::sort(tasks.begin(), tasks.end(), [](Task& a, Task& b) {
+        if (a.getPriority() != b.getPriority()) {
+            return a.getPriority() > b.getPriority();
+        }
+
+        return a.getTime() < b.getTime();
+     });
+
+    std::cout << "\n--- TASKS SORTED BY PRIORITY AND TIME ---\n";
+    for (auto& t : tasks) {
+        t.printTask();
+    }
+    std::cout << "---------------------------------------\n";
+}
+
+
 int main()
 {
     std::vector<Task> tasks;
@@ -306,7 +397,9 @@ int main()
         std::cout << "|3. Supprimer une tache           |\n";
         std::cout << "|4. Modifier une tache            |\n";
         std::cout << "|5. Sort By Category              |\n";
-        std::cout << "|6. Quitter                       |\n";
+        std::cout << "|6. Filter By Field               |\n";
+        std::cout << "|7. Sort tasks                    |\n";
+        std::cout << "|8. Quitter                       |\n";
         std::cout << "|---------------------------------|\n";
 
         int choice;
@@ -414,10 +507,38 @@ int main()
                 break;
             }
             case 5: {
-                tasks_by_category(tasks);
+                filter_by(Field::category, tasks);
                 break;
             }
             case 6: {
+                int choice;
+                std::cout << "Which field u wanna filter with:\n";
+                std::cout << "1. Status\n";
+                std::cout << "2. Priority\n";
+                std::cout << "3. Category\n";
+                std::cout << "votre choix: ";
+                std::cin >> choice;
+                switch (choice) {
+                    case 1: {
+                        filter_by(Field::status, tasks);
+                        break;
+                    }
+                    case 2: {
+                        filter_by(Field::priority, tasks);
+                        break;
+                    }
+                    case 3: {
+                        filter_by(Field::category, tasks);
+                        break;
+                    }
+                }
+                break;
+            }
+            case 7: {
+                tasks_sorted(tasks);
+                break;
+            }
+            case 8: {
                 std::cout << "Bye!\n";
                 std::exit(1);
             }
