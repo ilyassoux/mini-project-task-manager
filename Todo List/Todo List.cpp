@@ -7,6 +7,8 @@
 #include <string>
 #include <format>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 
 enum class Priority {
     Low,
@@ -72,6 +74,10 @@ class Task {
         // getters
         int getId() {
             return id;
+        }
+
+        std::string getTitle() {
+            return title;
         }
 
         Category getCategory() {
@@ -376,6 +382,18 @@ void tasks_sorted(std::vector<Task> tasks) {
 }
 
 
+void export_tasks(std::vector<Task> tasks) {
+    std::ofstream TaskFile("tasks.txt");
+    for (int i = 0; i < tasks.size(); i++) {
+        TaskFile << "id: " << tasks[i].getId()
+            << " | [" << tasks[i].CategoryToString(tasks[i].getCategory()) << "]"
+            << " | Task: " << tasks[i].getTitle()
+            << " | Status: " << tasks[i].StatusToString(tasks[i].getStatus())
+            << " | Priority: " << tasks[i].PriorityToString(tasks[i].getPriority()) << std::endl;
+    }
+    TaskFile.close();
+}
+
 int main()
 {
     std::vector<Task> tasks;
@@ -390,7 +408,8 @@ int main()
         std::cout << "|5. Sort By Category              |\n";
         std::cout << "|6. Filter By Field               |\n";
         std::cout << "|7. Sort tasks                    |\n";
-        std::cout << "|8. Quitter                       |\n";
+        std::cout << "|8. Export tasks                  |\n";
+        std::cout << "|9. Quitter                       |\n";
         std::cout << "|---------------------------------|\n";
 
         int choice;
@@ -470,6 +489,10 @@ int main()
                 break;
             }
             case 8: {
+                export_tasks(tasks);
+                break;
+            }
+            case 9: {
                 std::cout << "Bye!\n";
                 std::exit(1);
             }
