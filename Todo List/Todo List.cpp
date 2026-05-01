@@ -172,24 +172,89 @@ void delete_task(int id, std::vector<Task>& tasks) {
     }
 }
 
+Category c_input() {
+    Category category;
+    int c;
+
+    std::cout << "enter category: \n";
+    std::cout << "1. Travail\n";
+    std::cout << "2. Personnel\n";
+    std::cout << "3. Urgent\n";
+    std::cout << "4. Autre\n";
+    std::cout << "votre choix: ";
+    std::cin >> c;
+
+    switch (c) {
+    case 1: category = Category::Travail; break;
+    case 2: category = Category::Personnel; break;
+    case 3: category = Category::Urgent; break;
+    default: category = Category::Autre; break;
+    }
+
+    return category;
+}
+
+Priority p_input() {
+    Priority priority;
+    int p;
+
+    std::cout << "enter priority: \n";
+    std::cout << "1. Low\n";
+    std::cout << "2. Medium\n";
+    std::cout << "3. High\n";
+    std::cout << "votre choix: ";
+    std::cin >> p;
+
+    switch (p) {
+    case 1: priority = Priority::Low; break;
+    case 2: priority = Priority::Medium; break;
+    case 3: priority = Priority::High; break;
+    default: priority = Priority::Low; break;
+    }
+
+    return priority;
+}
+
+Field f_input() {
+    Field field;
+    int f;
+
+    std::cout << "1. Title\n";
+    std::cout << "2. Status\n";
+    std::cout << "3. Priority\n";
+    std::cout << "4. Category\n";
+    std::cout << "votre choix: ";
+    std::cin >> f;
+
+    switch (f) {
+    case 1: field = Field::title; break;
+    case 2: field = Field::status; break;
+    case 3: field = Field::category; break;
+    }
+
+    return field;
+}
+
+Status s_input() {
+    int choice;
+    std::cout << "1. Afaire\n";
+    std::cout << "2. EnCours\n";
+    std::cout << "3. Terminee\n";
+    std::cout << "votre choix: ";
+    std::cin >> choice;
+
+    switch (choice) {
+        case 2:  return Status::EnCours;
+        case 3:  return Status::Terminee;
+        default: return Status::Afaire;
+    }
+}
+
 void filter_by(Field field, std::vector<Task>& tasks) {
     bool found = false;
     switch (field) {
         case Field::category: {
-            int c;
-            std::cout << "enter category: \n";
-            std::cout << "1. Travail\n";
-            std::cout << "2. Personnel\n";
-            std::cout << "3. Urgent\n";
-            std::cout << "4. Autre\n";
-            std::cout << "votre choix: ";
-            std::cin >> c;
-
-            Category cat;
-            if (c == 1) cat = Category::Travail;
-            else if (c == 2) cat = Category::Personnel;
-            else if (c == 3) cat = Category::Urgent;
-            else cat = Category::Autre;
+            Category cat = c_input();
 
             for (int i = 0; i < tasks.size(); i++) {
                 if (tasks[i].getCategory() == cat) {
@@ -200,19 +265,8 @@ void filter_by(Field field, std::vector<Task>& tasks) {
             break;
         }
         case Field::priority: {
-            int p;
-            std::cout << "enter priority: \n";
-            std::cout << "1. Low\n";
-            std::cout << "2. Medium\n";
-            std::cout << "3. High\n";
-            std::cout << "votre choix: ";
-            std::cin >> p;
 
-            Priority priority;
-            if (p == 1) priority = Priority::Low;
-            else if (p == 2) priority = Priority::Medium;
-            else if (p == 3) priority = Priority::High;
-            else priority = Priority::Low;
+            Priority priority = p_input();
 
             for (int i = 0; i < tasks.size(); i++) {
                 if (tasks[i].getPriority() == priority) {
@@ -223,19 +277,8 @@ void filter_by(Field field, std::vector<Task>& tasks) {
             break;
         }
         case Field::status: {
-            int s;
             std::cout << "choisis la nouvelle status:\n";
-            std::cout << "1. Afaire\n";
-            std::cout << "2. EnCours\n";
-            std::cout << "3. Terminee\n";
-            std::cout << "votre choix: ";
-            std::cin >> s;
-
-            Status status;
-            if (s == 1) status = Status::Afaire;
-            else if (s == 2) status = Status::EnCours;
-            else if (s == 3) status = Status::Terminee;
-            else status = Status::Afaire;
+            Status status = s_input();
 
             for (int i = 0; i < tasks.size(); i++) {
                 if (tasks[i].getStatus() == status) {
@@ -259,6 +302,7 @@ void modify_task(Field field, int id, std::vector<Task>& tasks) {
     int index;
     if (check_id(id, tasks) == 1) {
         std::cout << "id pas disponible\n";
+        return;
     }
     else {
         for (int i = 0; i < tasks.size(); i++) {
@@ -271,28 +315,10 @@ void modify_task(Field field, int id, std::vector<Task>& tasks) {
     switch (field) {
 
         case Field::status: {
-            int choice;
-            std::cout << "choisis la nouvelle status:\n";
-            std::cout << "1. Afaire\n";
-            std::cout << "2. EnCours\n";
-            std::cout << "3. Terminee\n";
-            std::cout << "votre choix: ";
-            std::cin >> choice;
+            Status s = s_input();
 
-            switch (choice) {
-                case 1: {
-                    tasks[index].SetStatus(Status::Afaire);
-                    break;
-                }
-                case 2: {
-                    tasks[index].SetStatus(Status::EnCours);
-                    break;
-                }
-                case 3: {
-                    tasks[index].SetStatus(Status::Terminee);
-                    break;
-                }
-            }
+            tasks[index].SetStatus(s);
+
             std::cout << "Status changed Succesfully";
             break;
 
@@ -305,54 +331,19 @@ void modify_task(Field field, int id, std::vector<Task>& tasks) {
             break;
         }
         case Field::priority: {
-            int choice;
             std::cout << "choisis la nouvelle priority:\n";
-            std::cout << "1. Low\n";
-            std::cout << "2. Medium\n";
-            std::cout << "3. High\n";
-            std::cout << "votre choix: ";
-            std::cin >> choice;
-            switch (choice) {
-                case 1: {
-                    tasks[index].SetPriority(Priority::Low);
-                    break;
-                }
-                case 2: {
-                    tasks[index].SetPriority(Priority::Medium);
-                    break;
-                }
-                case 3: {
-                    tasks[index].SetPriority(Priority::High);
-                    break;
-                }
-            }
+
+            Priority p = p_input();
+
+            tasks[index].SetPriority(p);
+
             std::cout << "Priority changed Succesfully";
             break;
         }
         case Field::category: {
-            int choice;
-            std::cout << "choisis la nouvelle category:\n";
-            std::cout << "1. Travail\n";
-            std::cout << "2. Personnel\n";
-            std::cout << "3. Urgent\n";
-            std::cout << "4. Autre\n";
-            std::cout << "votre choix: ";
-            std::cin >> choice;
-            switch (choice) {
-                case 1: {
-                    tasks[index].SetCategory(Category::Travail);
-                    break;
-                }
-                case 2: {
-                    tasks[index].SetCategory(Category::Personnel);
-                    break;
-                }
-                case 3: {
-                    tasks[index].SetCategory(Category::Urgent);
-                    break;
-                }
-                default: tasks[index].SetCategory(Category::Autre);
-            }
+            Category c = c_input();
+            tasks[index].SetCategory(c);
+
             break;
         }
     }
@@ -422,35 +413,9 @@ int main()
                 std::cout << "enter title: ";
                 std::getline(std::cin, title);
 
-                std::cout << "enter priority: \n";
-                std::cout << "1. Low\n";
-                std::cout << "2. Medium\n";
-                std::cout << "3. High\n";
-                std::cout << "votre choix: ";
-                std::cin >> p;
+                priority = p_input();
 
-                switch (p) {
-                    case 1: priority = Priority::Low; break;
-                    case 2: priority = Priority::Medium; break;
-                    case 3: priority = Priority::High; break;
-                    default: priority = Priority::Low; break;
-                }
-
-                std::cout << "enter category: \n";
-                std::cout << "1. Travail\n";
-                std::cout << "2. Personnel\n";
-                std::cout << "3. Urgent\n";
-                std::cout << "4. Autre\n";
-                std::cout << "votre choix: ";
-                std::cin >> c;
-
-                switch (c) {
-                    case 1: category = Category::Travail; break;
-                    case 2: category = Category::Personnel; break;
-                    case 3: category = Category::Urgent; break;
-                    default: category = Category::Autre; break;
-                }
-                
+                category = c_input();
 
                 Task new_task = Task(title, priority, category);
 
@@ -479,30 +444,10 @@ int main()
                 }else {
                     int choice;
                     std::cout << "Which field u wanna modifie:\n";
-                    std::cout << "1. Title\n";
-                    std::cout << "2. Status\n";
-                    std::cout << "3. Priority\n";
-                    std::cout << "4. Category\n";
-                    std::cout << "votre choix: ";
-                    std::cin >> choice;
-                    switch (choice) {
-                        case 1: {
-                            modify_task(Field::title, id, tasks);
-                            break;
-                        }
-                        case 2: {
-                            modify_task(Field::status, id, tasks);
-                            break;
-                        }
-                        case 3: {
-                            modify_task(Field::priority, id, tasks);
-                            break;
-                        }
-                        case 4: {
-                            modify_task(Field::category, id, tasks);
-                            break;
-                        }
-                    }
+
+                    Field field = f_input();
+
+                    modify_task(field, id, tasks);
                 }
                 break;
             }
@@ -513,25 +458,11 @@ int main()
             case 6: {
                 int choice;
                 std::cout << "Which field u wanna filter with:\n";
-                std::cout << "1. Status\n";
-                std::cout << "2. Priority\n";
-                std::cout << "3. Category\n";
-                std::cout << "votre choix: ";
-                std::cin >> choice;
-                switch (choice) {
-                    case 1: {
-                        filter_by(Field::status, tasks);
-                        break;
-                    }
-                    case 2: {
-                        filter_by(Field::priority, tasks);
-                        break;
-                    }
-                    case 3: {
-                        filter_by(Field::category, tasks);
-                        break;
-                    }
-                }
+
+                Field field = f_input();
+
+                filter_by(field, tasks);
+
                 break;
             }
             case 7: {
