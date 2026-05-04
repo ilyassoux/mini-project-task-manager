@@ -1,6 +1,3 @@
-// Todo List.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <chrono>
 #include <vector>
@@ -9,6 +6,8 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+
+// enum pour chaque propriété de classe
 
 enum class Priority {
     Low,
@@ -54,7 +53,7 @@ class Task {
             status = Status::EnCours;
         }
 
-        // custom for importing tasks
+        // personnalisé pour l'importation de tâches
         Task(int existingId, std::string t, Priority p, Status s, Category c, std::string tm)
             : id(existingId), title(t), priority(p), status(s), category(c), time(tm) {
             if (existingId >= nextId) {
@@ -113,6 +112,8 @@ class Task {
                 << " | Priority: " << PriorityToString(priority) << std::endl;
         }
 
+        // helpers
+
         std::string StatusToString(Status s) {
             switch (s) {
                 case Status::Afaire:   return "A faire";
@@ -142,8 +143,11 @@ class Task {
         
 };
 
+// initialisation de l'id
 int Task::nextId = 1;
 
+
+// vérification de la présence de l'id dans le tableau des tâches
 int check_id(int id, std::vector<Task>& tasks) {
     for (int i = 0; i < tasks.size(); i++) {
         if (tasks[i].getId() == id) {
@@ -153,6 +157,8 @@ int check_id(int id, std::vector<Task>& tasks) {
     return 1;
 }
 
+
+// helper methode pour afficher les tasks
 void show_tasks(std::vector<Task>& tasks) {
     if (tasks.empty()) {
         std::cout << "|----------------------|\n";
@@ -161,16 +167,18 @@ void show_tasks(std::vector<Task>& tasks) {
     }
     else {
 
-        std::cout << "---------->" << tasks.size() << "Tasks found\n";
+        std::cout << "\n" << tasks.size() << " Tasks found\n";
         
-        std::cout << "****************************\n";
+        std::cout << "--------------------------------------------------------------------------------------\n";
         for (int i = 0; i < tasks.size(); i++) {                                                                    
             tasks[i].printTask();
         }
-        std::cout << "****************************\n";                                              
+        std::cout << "--------------------------------------------------------------------------------------\n";
     }
 }
-               
+
+   
+// méthode pour supprimer une tâche avec son id
 void delete_task(int id, std::vector<Task>& tasks) {
     if (check_id(id, tasks) == 1) {
         std::cout << "id pas disponible\n";
@@ -186,6 +194,8 @@ void delete_task(int id, std::vector<Task>& tasks) {
     }
 }
 
+
+// Méthodes d'assistance pour obtenir chaque élément (catégorie, priorité, champ, statut) sans duplication de code
 Category c_input() {
     Category category;
     int c;
@@ -243,7 +253,8 @@ Field f_input() {
     switch (f) {
     case 1: field = Field::title; break;
     case 2: field = Field::status; break;
-    case 3: field = Field::category; break;
+    case 3: field = Field::priority; break;
+    case 4: field = Field::category; break;
     }
 
     return field;
@@ -264,6 +275,8 @@ Status s_input() {
     }
 }
 
+
+// méthode de filtrage par (statut, priorité, catégorie)
 void filter_by(Field field, std::vector<Task>& tasks) {
     bool found = false;
     switch (field) {
@@ -311,7 +324,8 @@ void filter_by(Field field, std::vector<Task>& tasks) {
     }
 }
 
-//void modify_task(Field field, int id, std::vector<Task> tasks) {
+
+// méthode pour modifier un champ de tâche (titre, statut, priorité, catégorie)
 void modify_task(Field field, int id, std::vector<Task>& tasks) {
     int index;
     if (check_id(id, tasks) == 1) {
@@ -365,6 +379,7 @@ void modify_task(Field field, int id, std::vector<Task>& tasks) {
 }
 
 
+// method to show tasks sorted by priority and time
 void tasks_sorted(std::vector<Task> tasks) { 
     if (tasks.empty()) {
         std::cout << "|----------------------|\n";
@@ -373,7 +388,7 @@ void tasks_sorted(std::vector<Task> tasks) {
         return;
     }
 
-    // Sort the local copy 'tasks'
+    // Sort the local copy 'tasks' not the main one
     std::sort(tasks.begin(), tasks.end(), [](Task& a, Task& b) {
         if (a.getPriority() != b.getPriority()) {
             return a.getPriority() > b.getPriority();
@@ -389,12 +404,12 @@ void tasks_sorted(std::vector<Task> tasks) {
     std::cout << "---------------------------------------\n";
 }
 
-
+// Méthode permettant d'exporter les tâches vers deux fichiers : un pour la consultation et l'autre à utiliser lors de la prochaine importation.
 void export_tasks(std::vector<Task> tasks) {
 
     if (tasks.empty()) {
         std::cout << "|----------------------|\n";
-        std::cout << "|   No tasks to export |\n";
+        std::cout << "|  No tasks to export  |\n";
         std::cout << "|----------------------|\n";
         return;
     }
@@ -411,8 +426,8 @@ void export_tasks(std::vector<Task> tasks) {
     }
     TaskFile.close();
 
-    // for importing
 
+    // for importing
     std::ofstream FormattedTaskFile("formated_tasks.txt");
     
     for (Task task : tasks) {
@@ -429,6 +444,8 @@ void export_tasks(std::vector<Task> tasks) {
     std::cout << "Tasks Exported Succesfully";
 }
 
+
+// méthode pour importer des tâches à partir d'un fichier texte
 void import_tasks(std::vector<Task>& tasks, const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -465,6 +482,8 @@ void import_tasks(std::vector<Task>& tasks, const std::string& filename) {
     std::cout << "Tasks imported successfully\n";
 }
 
+
+// fonction principale contenant le menu de l'application
 int main()
 {
     std::vector<Task> tasks;
