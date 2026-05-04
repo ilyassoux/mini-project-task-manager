@@ -54,6 +54,14 @@ class Task {
             status = Status::EnCours;
         }
 
+        // custom for importing tasks
+        Task(int existingId, std::string t, Priority p, Status s, Category c, std::string tm)
+            : id(existingId), title(t), priority(p), status(s), category(c), time(tm) {
+            if (existingId >= nextId) {
+                nextId = existingId + 1;
+            }
+        }
+
         // setters
         void SetTitle(std::string t) {
             title = t;
@@ -164,7 +172,7 @@ void show_tasks(std::vector<Task>& tasks) {
 }
                
 void delete_task(int id, std::vector<Task>& tasks) {
-    if (id > tasks.size() || id < 0) {
+    if (check_id(id, tasks) == 1) {
         std::cout << "id pas disponible\n";
     }
     else {
@@ -383,6 +391,7 @@ void tasks_sorted(std::vector<Task> tasks) {
 
 
 void export_tasks(std::vector<Task> tasks) {
+    // for viewing
     std::ofstream TaskFile("tasks.txt");
     for (int i = 0; i < tasks.size(); i++) {
         TaskFile << "id: " << tasks[i].getId()
@@ -392,39 +401,59 @@ void export_tasks(std::vector<Task> tasks) {
             << " | Priority: " << tasks[i].PriorityToString(tasks[i].getPriority()) << std::endl;
     }
     TaskFile.close();
+
+    // for importing
+
+    std::ofstream FormattedTaskFile("formated_tasks.txt");
+    
+    for (Task task : tasks) {
+        FormattedTaskFile << task.getId() << ","
+                        << task.getTitle() << ","
+                        << static_cast<int>(task.getPriority()) << ","
+                        << static_cast<int>(task.getStatus()) << ","
+                        << static_cast<int>(task.getCategory()) << ","
+                        << task.getTime() << std::endl;
+    }
+
+    FormattedTaskFile.close();
+
+    std::cout << "Tasks Exported Succesfully";
 }
 
 void import_tasks(std::vector<Task>& tasks, const std::string& filename) {
     std::ifstream file(filename);
-
-    if (!file.is_open()) return;
+    if (!file.is_open()) {
+        std::cout << "Recheck file name\n";
+        return;
+    }
 
     tasks.clear();
-    std::string ligne;
 
-    while (std::getline(file, ligne)) {
-        // expected
-        std::stringstream ss(ligne);
-        std::string field;
+    std::string line;
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string segment;
         std::vector<std::string> data;
 
-        while (std::getline(ss, field, ',')) {
-            data.push_back(field);
+        while (std::getline(ss, segment, ',')) {
+            data.push_back(segment);
         }
 
         if (data.size() == 6) {
-            //Task new_task = Task(title, priority, category);
-
-            Task new_task = Task(data[0], static_cast<Priority>(std::stoi(data[2])), static_cast<Category>(std::stoi(data[4])));
-
-            new_task.SetStatus(static_cast<Status>(std::stoi(data[3])));
-
+            // using custom constructor
+            Task new_task(
+                std::stoi(data[0]), // ID
+                data[1],            // Title
+                static_cast<Priority>(std::stoi(data[2])),
+                static_cast<Status>(std::stoi(data[3])),
+                static_cast<Category>(std::stoi(data[4])),
+                data[5]             // Time
+            );
             tasks.push_back(new_task);
         }
     }
     file.close();
-    std::cout << "Tasks imported succesfully";
-
+    std::cout << "Tasks imported successfully\n";
 }
 
 int main()
@@ -528,11 +557,13 @@ int main()
             }
             case 9: {
                 std::string filename;
-                std::cout << "enter the filename.txt";
+                std::cout << "enter the filename.txt: ";
 
                 std::cin >> filename;
 
                 import_tasks(tasks, filename);
+
+                break;
                 
             }
             case 10: {
