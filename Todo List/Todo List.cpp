@@ -391,6 +391,15 @@ void tasks_sorted(std::vector<Task> tasks) {
 
 
 void export_tasks(std::vector<Task> tasks) {
+
+    if (tasks.empty()) {
+        std::cout << "|----------------------|\n";
+        std::cout << "|   No tasks to export |\n";
+        std::cout << "|----------------------|\n";
+        return;
+    }
+
+
     // for viewing
     std::ofstream TaskFile("tasks.txt");
     for (int i = 0; i < tasks.size(); i++) {
