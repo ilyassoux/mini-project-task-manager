@@ -394,6 +394,39 @@ void export_tasks(std::vector<Task> tasks) {
     TaskFile.close();
 }
 
+void import_tasks(std::vector<Task>& tasks, const std::string& filename) {
+    std::ifstream file(filename);
+
+    if (!file.is_open()) return;
+
+    tasks.clear();
+    std::string ligne;
+
+    while (std::getline(file, ligne)) {
+        // expected
+        std::stringstream ss(ligne);
+        std::string field;
+        std::vector<std::string> data;
+
+        while (std::getline(ss, field, ',')) {
+            data.push_back(field);
+        }
+
+        if (data.size() == 6) {
+            //Task new_task = Task(title, priority, category);
+
+            Task new_task = Task(data[0], static_cast<Priority>(std::stoi(data[2])), static_cast<Category>(std::stoi(data[4])));
+
+            new_task.SetStatus(static_cast<Status>(std::stoi(data[3])));
+
+            tasks.push_back(new_task);
+        }
+    }
+    file.close();
+    std::cout << "Tasks imported succesfully";
+
+}
+
 int main()
 {
     std::vector<Task> tasks;
@@ -409,7 +442,8 @@ int main()
         std::cout << "|6. Filter By Field               |\n";
         std::cout << "|7. Sort tasks                    |\n";
         std::cout << "|8. Export tasks                  |\n";
-        std::cout << "|9. Quitter                       |\n";
+        std::cout << "|9. Import tasks                  |\n";
+        std::cout << "|10. Quitter                      |\n";
         std::cout << "|---------------------------------|\n";
 
         int choice;
@@ -493,6 +527,15 @@ int main()
                 break;
             }
             case 9: {
+                std::string filename;
+                std::cout << "enter the filename.txt";
+
+                std::cin >> filename;
+
+                import_tasks(tasks, filename);
+                
+            }
+            case 10: {
                 std::cout << "Bye!\n";
                 std::exit(1);
             }
