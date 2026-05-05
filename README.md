@@ -19,7 +19,7 @@ Vous pouvez utiliser ce gestionnaire de deux manières :
 
 ### 1. Utiliser l'exécutable (Windows)
 Téléchargez directement le fichier `todolist.exe` depuis les "Releases" :
-👉 [Lien de téléchargement version finale](https://github.com/6db9/mini-project-task-manager/releases/tag/v2)
+👉 [Lien de téléchargement version finale](https://github.com/6db9/mini-project-task-manager/releases/tag/v.f)
 
 ### 2. Compiler à partir des sources
 Si vous préférez compiler le code vous-même, récupérez le fichier source :
