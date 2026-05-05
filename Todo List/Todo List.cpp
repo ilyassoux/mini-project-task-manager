@@ -354,7 +354,10 @@ void modify_task(Field field, int id, std::vector<Task>& tasks) {
         case Field::title: {
             std::string new_title;
             std::cout << "enter the new title: ";
-            std::cin >> new_title;
+
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::getline(std::cin, new_title);
+
             tasks[index].SetTitle(new_title);
             break;
         }
@@ -505,7 +508,14 @@ int main()
 
         int choice;
         std::cout << "choissisez: ";
-        std::cin >> choice;
+
+        if (!(std::cin >> choice)) {
+            std::cout << "Invalid input! Please enter a number (1..10)\n";
+            std::cin.clear(); 
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            continue; 
+        }
+
 
         switch (choice) {
             case 1: {
