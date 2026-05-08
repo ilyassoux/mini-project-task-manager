@@ -48,14 +48,14 @@ class Task {
 
     public:
         // constructor
-        Task(std::string t, Priority p, Category c) : id(nextId++), title(t), priority(p), category(c) {
+        Task(const std::string& t, Priority p, Category c) : id(nextId++), title(t), priority(p), category(c) {
             auto now = std::chrono::system_clock::now();
             time = std::format("{:%Y-%m-%d %H:%M:%S}", now);
             status = Status::EnCours;
         }
 
         // personnalisé pour l'importation de tâches
-        Task(int existingId, std::string t, Priority p, Status s, Category c, std::string tm)
+        Task(int existingId, const std::string& t, Priority p, Status s, Category c, const std::string& tm)
             : id(existingId), title(t), priority(p), status(s), category(c), time(tm) {
             if (existingId >= nextId) {
                 nextId = existingId + 1;
@@ -63,7 +63,7 @@ class Task {
         }
 
         // setters
-        void SetTitle(std::string t) {
+        void SetTitle(const std::string& t) {
             title = t;
         }
 
@@ -105,7 +105,7 @@ class Task {
         }
 
         // methodes
-        void printTask() {
+        void printTask() const {
             std::cout << "id: " << id
                 << " | [" << CategoryToString(category) << "]" 
                 << " | Task: " << title
@@ -115,7 +115,7 @@ class Task {
 
         // helpers
 
-        std::string StatusToString(Status s) {
+        std::string StatusToString(Status s) const {
             switch (s) {
                 case Status::Afaire:   return "A faire";
                 case Status::EnCours:  return "En cours";
@@ -124,7 +124,7 @@ class Task {
             }
         }
 
-        std::string PriorityToString(Priority p) {
+        std::string PriorityToString(Priority p) const {
             switch (p) {
             case Priority::Low:   return "Low";
             case Priority::Medium:   return "Medium";
@@ -133,7 +133,7 @@ class Task {
             }
         }
 
-        std::string CategoryToString(Category c) {
+        std::string CategoryToString(Category c) const {
             switch (c) {
             case Category::Travail:   return "Travail";
             case Category::Personnel: return "Personnel";
@@ -393,7 +393,7 @@ void tasks_sorted(std::vector<Task> tasks) {
     }
 
     // Sort the local copy 'tasks' not the main one
-    std::sort(tasks.begin(), tasks.end(), [](Task& a, Task& b) {
+    std::sort(tasks.begin(), tasks.end(), [](const Task& a, const Task& b) {
         if (a.getPriority() != b.getPriority()) {
             return a.getPriority() > b.getPriority();
         }
